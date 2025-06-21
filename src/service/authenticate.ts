@@ -1,6 +1,7 @@
 import { User } from "@prisma/client";
 import { UsersRepository } from "../repositories/users-repository";
 import { compare } from "bcryptjs";
+import { TokenProvider } from "../@types/token-provider";
 
 interface AuthenticateServiceRequest {
     email: string;
@@ -9,10 +10,14 @@ interface AuthenticateServiceRequest {
 
 interface AuthenticateServiceResponse {
     user: User;
+    token: string
 }
 
 export class AuthenticateService {
-    constructor(private usersRepository: UsersRepository) {}
+    constructor(
+        private usersRepository: UsersRepository,
+        private tokenProvider: TokenProvider
+    ) {}
 
     async execute({ email, password }: AuthenticateServiceRequest): Promise<AuthenticateServiceResponse> {
         const user = await this.usersRepository.findByEmail(email)
@@ -27,8 +32,11 @@ export class AuthenticateService {
             throw new Error('Invalid credentials.')
         }
 
+        const token = await this.tokenProvider.sign({ sub:user.id })
+
         return {
             user,
+            token
         }
     }
 }
