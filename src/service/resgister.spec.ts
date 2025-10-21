@@ -8,7 +8,7 @@ let sut: RegisterService
 
 describe('Register Service', () => {
     beforeEach(() => {
-        usersRepository = new InMemoryUsersRepository()
+        usersRepository = new InMemoryUsersRepository() 
         sut = new RegisterService(usersRepository)
     })
 

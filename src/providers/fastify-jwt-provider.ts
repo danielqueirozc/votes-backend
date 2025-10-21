@@ -3,6 +3,8 @@ import { app } from "../app";
 
 export class FastifyJwtProvider implements TokenProvider {
     sign(payload: object): string {
-        return app.jwt.sign(payload)
+        return app.jwt.sign(payload, {
+            expiresIn: '7d' // Token expira em 7 dias
+        })
     }
 }

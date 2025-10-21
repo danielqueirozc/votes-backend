@@ -20,20 +20,64 @@ model User {
   password_hash String
   createdAt     DateTime @default(now())
 
-  votes Vote[]
+  votes     Vote[]
+  userVotes UserVote[]
 
   @@map("users")
 }
 
-model Vote {
+model Participant {
   id        String   @id @default(uuid())
   imageUrl  String
-  name      String   
+  name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  votes     VoteParticipant[]
+  userVotes UserVote[]
+
+  @@map("Participants")
+}
+
+model Vote {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  title     String
 
   user   User   @relation(fields: [userId], references: [id])
   userId String
 
+  participants VoteParticipant[]
+  userVotes    UserVote[]
+
   @@map("votes")
+}
+
+model VoteParticipant {
+  id String @id @default(uuid())
+
+  vote   Vote   @relation(fields: [voteId], references: [id], onDelete: Cascade)
+  voteId String
+
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  participantId String
+
+  @@unique([voteId, participantId])
+  @@map("vote_participants")
+}
+
+model UserVote {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  vote   Vote   @relation(fields: [voteId], references: [id], onDelete: Cascade)
+  voteId String
+
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  participantId String
+
+  @@unique([userId, voteId])
 }

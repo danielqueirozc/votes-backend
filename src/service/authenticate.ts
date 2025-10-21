@@ -32,7 +32,7 @@ export class AuthenticateService {
             throw new Error('Invalid credentials.')
         }
 
-        const token = await this.tokenProvider.sign({ sub:user.id })
+        const token = this.tokenProvider.sign({ sub: user.id })
 
         return {
             user,
