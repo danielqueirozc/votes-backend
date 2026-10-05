@@ -10,6 +10,9 @@ import { DeleteParticipant } from "../controller/delete-participant";
 import { getVoteById } from "../controller/get-vote-by-id";
 import { uploadImage } from "../controller/upload-image";
 import { DeleteVotes } from "../controller/delete-vote";
+import { countVotesParticipants } from "../controller/count-votes-participants";
+import { voteOnParticipants } from "../controller/vote-on-participant";
+import { closeVoting } from "../controller/closeVoting";
 
 export function appRoutes(app: FastifyInstance) {
     app.post('/users', Register)
@@ -23,4 +26,7 @@ export function appRoutes(app: FastifyInstance) {
     app.delete('/delete-participant/:id', DeleteParticipant)
     app.post('/upload', uploadImage)
     app.delete('/delete-votes', DeleteVotes)
+    app.get('/participants/:participantId/votes/count', countVotesParticipants)
+    app.post('/vote', voteOnParticipants)
+    app.post('/vote/:voteId/close', closeVoting)
 }
