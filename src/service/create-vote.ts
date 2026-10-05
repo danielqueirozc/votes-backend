@@ -30,8 +30,11 @@ export class CreateVoteService {
         title, 
         userId 
     }: CreateVoteServiceRequest): Promise<CreateVoteServiceResponse> {
+
+
+    /////////////// validações  ///////////////
         
-        // Validações de negócio
+        // validar se tem titulo
         if (!title.trim()) {
             throw new Error("Título da votação é obrigatório")
         }
@@ -44,8 +47,9 @@ export class CreateVoteService {
             throw new Error("Uma votação pode ter no máximo 3 participantes")
         }
 
-        // Verificar se não há IDs duplicados
-        const uniqueIds = [...new Set(participantIds)];
+        // verificar se não há IDs duplicados
+        // new Set = objeto especial do JS que armazena valores únicos, os valores duplicados são automaticamente removidos, esta dentro do array com ... para espalhar os valores unicos do Set em um novo array
+        const uniqueIds = [...new Set(participantIds)] 
         if (uniqueIds.length !== participantIds.length) {
             throw new Error("Não é possível adicionar o mesmo participante mais de uma vez")
         }
