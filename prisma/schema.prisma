@@ -1,16 +1,12 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -36,18 +32,32 @@ model Participant {
   votes     VoteParticipant[]
   userVotes UserVote[]
 
-  @@map("Participants")
+  @@map("participants")
+}
+
+enum VoteStatus {
+  ACTIVE
+  CLOSED
 }
 
 model Vote {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
   title     String
+  status    VoteStatus @default(ACTIVE)
+
+  // esse voto pode ter um vencedor
+  winner     VoteParticipant? @relation("VoteWinner", fields: [winnerId], references: [id])
+  winnerId   String?          @unique
+  winnerName String?          @unique
 
   user   User   @relation(fields: [userId], references: [id])
   userId String
 
-  participants VoteParticipant[]
+  // many to many
+  // nao precisa de fields e references porque a chave estrangeira vai ser criada em uma tabela intermediaria que o prisma cria
+  participants VoteParticipant[] @relation("VoteParticipants")
+  tied         VoteParticipant[] @relation("VoteTied")
   userVotes    UserVote[]
 
   @@map("votes")
@@ -56,8 +66,14 @@ model Vote {
 model VoteParticipant {
   id String @id @default(uuid())
 
-  vote   Vote   @relation(fields: [voteId], references: [id], onDelete: Cascade)
+  vote   Vote   @relation("VoteParticipants", fields: [voteId], references: [id], onDelete: Cascade)
   voteId String
+
+  // este VoteParticipant pode ser o vencedor de uma Vote
+  winnerOf Vote? @relation("VoteWinner")
+
+  // este VoteParticipant pode estar empatado em uma Vote
+  tiedIn Vote[] @relation("VoteTied")
 
   participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
   participantId String
@@ -70,8 +86,8 @@ model UserVote {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String?
 
   vote   Vote   @relation(fields: [voteId], references: [id], onDelete: Cascade)
   voteId String
@@ -79,5 +95,12 @@ model UserVote {
   participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
   participantId String
 
-  @@unique([userId, voteId])
+  // campo para identificar votantes anônimos
+  anonymousId String?
+
+  // Agora verifica no código se userId OU anonymousId já votou
+  @@index([voteId, participantId])
+  @@index([voteId, anonymousId])
+  @@index([voteId, userId])
+  @@map("user_votes")
 }
