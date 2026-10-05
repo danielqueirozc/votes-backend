@@ -11,7 +11,7 @@ export async function CreateParticipant(request: FastifyRequest, reply: FastifyR
     const { name, imageUrl } = bodySchema.parse(request.body)
 
     try {
-        // await request.jwtVerify()
+        await request.jwtVerify()
 
         const createParticipantService = MakeCreateParticipantService()
 
