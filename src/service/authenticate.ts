@@ -9,7 +9,7 @@ interface AuthenticateServiceRequest {
 }
 
 interface AuthenticateServiceResponse {
-    user: User;
+    user: User
     token: string
 }
 
@@ -26,6 +26,7 @@ export class AuthenticateService {
             throw new Error('Invalid credentials.')
         }
 
+        // isso vai pegar a senha do usuário e vai fazer um hash dela para comparar com o hash(senha) do banco de dados
         const doesPasswordMatches = await compare(password, user.password_hash)
 
         if (!doesPasswordMatches) {
