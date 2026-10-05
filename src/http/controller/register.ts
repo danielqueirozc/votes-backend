@@ -13,14 +13,20 @@ export async function Register(request: FastifyRequest, reply: FastifyReply) {
 
     try {
         const registerService = MakeRegisterService()
-
         await registerService.execute({ name, email, password })
+        
+        return reply.status(201).send()
+        
     } catch (error) {
         if (error instanceof Error) {
-            return reply.status(409).send({ message: error.message })
+            // Se for erro de usuário, já existe
+            if (error.message === 'User already exists.') {
+                return reply.status(409).send({ message: error.message })
+            }
+            
+            // Outros erros = 500
+            console.error('Erro no registro:', error)
+            return reply.status(500).send({ message: 'Internal server error' })
         }
     }
-
-    return reply.status(201).send()
-
 }
