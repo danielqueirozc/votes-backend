@@ -28,7 +28,7 @@ describe('Register Service', () => {
        const { user } = await sut.execute({
             name: 'John Doe',
             email: '8B0lT@example.com',
-            password: '123456'  
+            password: '123456'
        })
 
        const isPasswordCorrectlyHashed = await compare('123456', user.password_hash)
