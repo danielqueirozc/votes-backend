@@ -16,18 +16,23 @@ export class RegisterService {
     constructor(private usersRepository: UsersRepository) {}
 
     async execute({ name, email, password }: RegisterServiceRequest): Promise<RegisterServiceResponse> {
-        const userWithSameEmail = await this.usersRepository.findByEmail(email)
+        try {
+            const userWithSameEmail = await this.usersRepository.findByEmail(email)
+            
+            if (userWithSameEmail) {
+                throw new Error('User already exists.')
+            }
 
-        if (userWithSameEmail) {
-            throw new Error('User already exists.')
-        }
+            const password_hash = await hash(password, 7)
 
-        const password_hash = await hash(password, 7)
+            const user = await this.usersRepository.create({ name, email, password_hash })
 
-        const user = await this.usersRepository.create({ name, email, password_hash })
-
-        return {
-            user,
+            return {
+                user,
+            }
+        } catch (error) {
+            console.log('ERRO NO SERVICE:', error)
+            throw error
         }
     }
 }
