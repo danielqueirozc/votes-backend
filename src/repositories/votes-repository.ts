@@ -1,4 +1,4 @@
-import { Prisma, Vote } from "@prisma/client";
+import { Vote, type VoteStatus } from "@prisma/client";
 
 export interface CreateVoteDTO {
     title: string,
@@ -19,7 +19,6 @@ export interface VoteWithParticipants extends Vote {
 export interface VotesRepository {
     create(data: CreateVoteDTO): Promise<VoteWithParticipants>
     delete(): Promise<void>
-    // Edit(id: string, data: Prisma.VoteUpdateInput): Promise<void>
     getAll(): Promise<VoteWithParticipants[]>
     getById(id: string): Promise<VoteWithParticipants | null>
 }
