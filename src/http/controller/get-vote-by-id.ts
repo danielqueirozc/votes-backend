@@ -7,7 +7,6 @@ export async function getVoteById(req: FastifyRequest, reply: FastifyReply) {
     id: z.string()
   })
 
-
   try {
     const { id } = paramsSchema.parse(req.params)
 
