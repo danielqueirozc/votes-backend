@@ -1,7 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { MakeCreateVoteService } from "../../service/factories/make-create-vote-service";
-import { NotifyAllClients } from "../../app";
 
 export async function CreateVote(request: FastifyRequest, reply: FastifyReply) {
     const bodySchema = z.object({
@@ -12,41 +11,24 @@ export async function CreateVote(request: FastifyRequest, reply: FastifyReply) {
     })
 
     try {
-        // Verificar se o usuário está autenticado
         await request.jwtVerify()
 
-        // Extrair dados do body
         const { title, participantIds } = bodySchema.parse(request.body)
 
-        // Extrair userId do token JWT
+        // extrair userId do token JWT
         const userId = (request.user as { sub: string }).sub
 
         // Instanciar o service
         const createVoteService = MakeCreateVoteService()
 
-        // Executar criação do voto
+        // executar criação do voto
         const { vote } = await createVoteService.execute({ 
             title, 
             participantIds, 
             userId 
         })
 
-        NotifyAllClients({
-            event: "new_vote",
-            data: {
-                id: vote.id,
-                title: vote.title,
-                createdAt: vote.createdAt,
-                participantsCount: vote.participants.length,
-                participants: vote.participants.map(vp => ({
-                id: vp.participant.id,
-                name: vp.participant.name,
-                imageUrl: vp.participant.imageUrl
-                }))
-            }
-        })  
-
-        // Retornar sucesso com os dados do voto criado
+        // retornar sucesso com os dados do voto criado
         return reply.status(201).send({
             message: "Votação criada com sucesso",
             vote: {
@@ -65,7 +47,7 @@ export async function CreateVote(request: FastifyRequest, reply: FastifyReply) {
     } catch (error) {
         console.error("Erro ao criar votação:", error);
 
-        // Erro de validação do Zod
+        // erro de validação do Zod
         if (error instanceof z.ZodError) {
             return reply.status(400).send({
                 message: "Dados inválidos",
@@ -73,14 +55,14 @@ export async function CreateVote(request: FastifyRequest, reply: FastifyReply) {
                     field: err.path.join('.'),
                     message: err.message
                 }))
-            });
+            })
         }
 
-        // Erro de autenticação JWT
+        // erro de autenticação JWT
         if (error instanceof Error && error.message.includes('jwt')) {
             return reply.status(401).send({
                 message: "Token inválido ou expirado"
-            });
+            })
         }
 
         // Outros erros do service (ex: validação de negócio)
@@ -90,7 +72,7 @@ export async function CreateVote(request: FastifyRequest, reply: FastifyReply) {
             })
         }
 
-        // Erro genérico
+        // erro genérico
         return reply.status(500).send({
             message: "Erro interno do servidor"
         })
