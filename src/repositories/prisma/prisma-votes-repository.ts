@@ -1,17 +1,18 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 import { VotesRepository, type CreateVoteDTO, type VoteWithParticipants } from "../votes-repository";
 
 export class PrismaVotesRepository implements VotesRepository {
   async create(data: CreateVoteDTO): Promise<VoteWithParticipants> {
 
     if (data.participantIds.length < 2 || data.participantIds.length > 3) {
-      throw new Error("Uma votação deve ter entre 2 e 3 participantes");
+      throw new Error("Uma votação deve ter entre 2 e 3 participantes")
     }
 
     const vote = await prisma.vote.create({
       data: {
         title: data.title,
         userId: data.userId,
+        status: 'ACTIVE',
         participants: {
           create: data.participantIds.map(participantId => ({
             participantId: participantId
