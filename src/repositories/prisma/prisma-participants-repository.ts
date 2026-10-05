@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client"
 import { ParticipantsRepository } from "../participants-repository"
-import { prisma } from "../../lib/prisma"
+import { prisma } from "../../lib/prisma.js"
 
 export class PrismaParticipantsRepository implements ParticipantsRepository {
     async Create({ name, imageUrl }: Prisma.ParticipantCreateInput) {
